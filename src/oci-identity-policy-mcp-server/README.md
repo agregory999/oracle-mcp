@@ -7,6 +7,12 @@ This server is a zero-code wrapper for the MCP server provided by the
 container runtime defaults, and client setup examples for OCI IAM policy and
 identity analysis.
 
+For full upstream project documentation, see
+[oci-policy-analysis](https://github.com/agregory999/oci-policy-analysis). That
+documentation includes specific guidance for configuring the OCI permissions
+needed to run this tool with OCI CLI profiles, instance principals, or resource
+principals.
+
 MCP is flexible. The same server can be started in several ways:
 
 - as a local Python process managed by an MCP client over `stdio`

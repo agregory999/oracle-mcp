@@ -17,10 +17,14 @@ compartments, cached snapshots, and cross-tenancy policy statements.
 
 | Tool | Use it for |
 | --- | --- |
-| `policy_search` | One policy question, such as who can manage a resource. |
-| `identity_search` | Finding a user, group, dynamic group, domain, or membership. |
-| `data_operations` | Checking readiness, loading a cache, or reloading OCI data. |
-| `policy_history_search` | Comparing policy results across cached snapshots. |
+| `policy_search` | Search OCI IAM policies for one policy question, such as who can manage a resource. |
+| `policy_search_set` | Run related policy searches and summarize coverage for an access review or installation validation. |
+| `policy_history_search` | Compare policy-search results across cached snapshots. |
+| `identity_search` | Search users, groups, dynamic groups, compartments, identity domains, and memberships. |
+| `data_operations` | Check readiness, list or load caches, and reload OCI data. |
+| `cross_tenancy_search` | List cross-tenancy aliases or search cross-tenancy policy statements. |
+| `oke_workload_identity_search` | Search policies that grant access to OKE workload identities. |
+| `tag_based_policy_search` | Search parsed tag-based policy conditions and associated warnings. |
 
 ## Prerequisites and IAM access
 
@@ -92,10 +96,53 @@ The MCP endpoint is `http://127.0.0.1:8765/mcp`; the health endpoint is
 `http://127.0.0.1:8765/health`. Keep an HTTP server bound to localhost unless
 you have an authenticated, trusted network boundary.
 
+## Additional MCP server parameters
+
+Choose exactly one authentication or data source: `--profile`,
+`--instance-principal`, `--resource-principal`, `--session-token`, or
+`--use-cache`. The following options are useful when adapting the server to
+your tenancy and runtime environment.
+
+| Parameter | When to use it |
+| --- | --- |
+| `--compartment-domain-search-depth 1-6` | Control how far identity-domain discovery traverses from the root compartment. Use `1` for root-only domains, `2` to include direct children, and a larger value only when domains are nested more deeply. |
+| `--instance-principal` | Run on an OCI Compute instance using its instance principal instead of an OCI CLI profile. |
+| `--resource-principal` | Run in an OCI resource that supplies a resource principal, such as a supported OCI managed runtime. |
+| `--use-cache <CACHE_NAME>` | Start from an existing combined cache rather than loading live tenancy data. This will be on your local machine after a previous run loading from a live tenancy.|
+| `--dont-save-cache-after-load` | Avoid writing a combined cache after a live load. |
+| `--log-level INFO` | Increase standalone-server diagnostics while troubleshooting. |
+
+### Run on an OCI Compute instance
+
+To use an instance principal, create a dynamic group that includes the Compute
+instance and grant it the same read-only IAM permissions listed above. Then
+start the server without `--profile`:
+
+```sh
+python -m oci_policy_analysis.mcp_server \
+  --instance-principal \
+  --transport streamable-http \
+  --host 127.0.0.1 \
+  --port 8765
+```
+
+The OCI SDK obtains the instance principal automatically. The instance still
+needs network access to the OCI Identity service endpoints for its region.
+
 ## MCP client configuration
 
 Use the absolute path to the virtual environment's Python executable, not a
 shell-dependent `python` alias.
+
+### Find `PYTHON_EXECUTABLE`
+
+Activate the virtual environment, then run `which python` and use the returned
+absolute path wherever these examples show `<PYTHON_EXECUTABLE>`:
+
+```sh
+source .venv/bin/activate
+which python
+```
 
 ### Claude Desktop
 

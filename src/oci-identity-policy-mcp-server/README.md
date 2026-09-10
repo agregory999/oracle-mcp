@@ -12,6 +12,30 @@ OCI CLI `DEFAULT` profile, and a tenancy with a single identity domain or
 root-level identity domains. For non-default profiles, caches, client-specific
 examples, and troubleshooting, see the [full README](README-FULL.md).
 
+## How the pieces fit
+
+```mermaid
+flowchart LR
+    Client["MCP client<br/>Codex, Claude, or Inspector"]
+
+    subgraph Computer["Your local computer"]
+        Wrapper["This wrapper repository<br/>configuration and documentation"]
+        Package["oci-policy-analysis[mcp]<br/>Python package and MCP server"]
+        Profile["OCI CLI profile<br/>or other configured principal"]
+    end
+
+    Tenancy["OCI tenancy<br/>IAM policies, compartments, and identities"]
+
+    Client <-- "MCP: stdio or HTTP" --> Package
+    Wrapper --> Package
+    Package --> Profile
+    Package <-- "read-only OCI API calls" --> Tenancy
+```
+
+The wrapper supplies packaging and setup guidance; `oci-policy-analysis[mcp]`
+provides the server implementation. Your configured OCI principal authorizes
+the package to read IAM data from the tenancy.
+
 ## Tools
 
 | Tool Name | Description |
